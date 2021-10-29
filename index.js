@@ -1,3 +1,4 @@
+const inquirer = require('inquirer');
 // Import and require mysql2
 const mysql = require('mysql2');
 require("dotenv").config();
@@ -34,10 +35,10 @@ function initialPrompt(){
         choices: ["View all departments", "View all roles", "View all employees", "Add a department", "Add a role", "Add an employee", "Update an employee", "Exit EMS Program"]
     }])
 
-    .then(function(selection){
+    .then(function({selection}){
         if (selection === "View all roles") {
            // db.query('SELECT * FROM students', function (err, results) {
-                console.log(results);
+                console.log("roles");
                 initialPrompt();
             //});
         } else if (selection === "View all employees") {
@@ -67,12 +68,12 @@ function initialPrompt(){
             //});
         } else if (selection === "Exit EMS Program") {
                 console.log("Thank you and have a great day, Good bye!!!")
-                process.end();
+                process.exit();
         } else { // this is the function for "View all departments"
-            //db.query('SELECT * FROM students', function (err, results) {
+            db.query('SELECT * FROM departments;', function (err, results) {
                 console.log(results);
                 initialPrompt();
-           // });
+            });
         };
     });
 };
