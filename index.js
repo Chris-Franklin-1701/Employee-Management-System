@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 // Import and require mysql2
 const mysql = require('mysql2');
+const cTable = require('console.table');
 require("dotenv").config();
 
 
@@ -43,7 +44,7 @@ function initialPrompt(){
             //});
         } else if (selection === "View all employees") {
             //db.query('SELECT * FROM students', function (err, results) {
-                console.log(results);
+                console.log(result);
                 initialPrompt();
             //});
         } else if (selection === "Add a department") {
@@ -71,7 +72,7 @@ function initialPrompt(){
                 process.exit();
         } else { // this is the function for "View all departments"
             db.query('SELECT * FROM departments;', function (err, results) {
-                console.log(results);
+                console.table(results);
                 initialPrompt();
             });
         };
