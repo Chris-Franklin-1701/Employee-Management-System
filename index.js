@@ -38,15 +38,25 @@ function initialPrompt(){
 
     .then(function({selection}){
         if (selection === "View all roles") {
-           // db.query('SELECT * FROM students', function (err, results) {
-                console.log("roles");
+            db.query(`SELECT roles.title AS title, roles.id AS id, departments.name AS department, roles.salary AS salary
+                FROM roles
+                JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
+                console.table(results);
                 initialPrompt();
-            //});
+            });
         } else if (selection === "View all employees") {
-            //db.query('SELECT * FROM students', function (err, results) {
-                console.log(result);
+            db.query(`SELECT employee.id AS id,
+            employee.first_name AS first_name, employee.last_name AS last_name, roles.title AS title, departments.name AS department, roles.salary AS salary, CONCAT(m.first_name, '' ,m.last_name) AS manager
+            FROM employee
+            JOIN roles
+            ON employee.role_id = roles.id
+            JOIN departments
+            ON roles.department_id = departments.id
+            JOIN employee m
+            ON employee.manager_id = employee.id;`, function (err, results) {
+                console.table(results);
                 initialPrompt();
-            //});
+            });
         } else if (selection === "Add a department") {
             //db.query('SELECT * FROM students', function (err, results) {
                 console.log(results);

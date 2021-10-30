@@ -1,3 +1,3 @@
-SELECT *
+SELECT roles.title AS title, roles.id AS id, departments.name AS department, roles.salary AS salary
 FROM roles
-JOIN department_name ON roles.department_name = departments.name;
+JOIN departments ON roles.department_id = departments.id;
