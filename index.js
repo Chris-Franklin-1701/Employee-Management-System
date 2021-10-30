@@ -45,15 +45,14 @@ function initialPrompt(){
                 initialPrompt();
             });
         } else if (selection === "View all employees") {
-            db.query(`SELECT employee.id AS id,
-            employee.first_name AS first_name, employee.last_name AS last_name, roles.title AS title, departments.name AS department, roles.salary AS salary, CONCAT(m.first_name, '' ,m.last_name) AS manager
-            FROM employee
-            JOIN roles
-            ON employee.role_id = roles.id
-            JOIN departments
+            db.query(`SELECT e.id AS id, e.first_name AS first_name, e.last_name AS last_name, roles.title AS title, departments.name AS department, roles.salary AS salary, CONCAT(m.first_name ,' ',m.last_name) AS manager
+            FROM employee e
+            INNER JOIN roles
+            ON e.role_id = roles.id
+            INNER JOIN departments
             ON roles.department_id = departments.id
-            JOIN employee m
-            ON employee.manager_id = employee.id;`, function (err, results) {
+            LEFT JOIN employee m
+            ON m.id = e.manager_id;`, function (err, results) {
                 console.table(results);
                 initialPrompt();
             });
