@@ -57,15 +57,59 @@ function initialPrompt(){
                 initialPrompt();
             });
         } else if (selection === "Add a department") {
-            //db.query('SELECT * FROM students', function (err, results) {
-                console.log(results);
-                initialPrompt();
-            //});
+            function addDepartment(){
+                inquirer.prompt([{
+                    type: "input",
+                    message: "What is the name of the department?",
+                    name: "name"
+                }])
+            
+                .then((data) =>{
+            
+                    db.query(`INSERT INTO departments (name) VALUES ('${data.name}')`, (err, results) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        console.log("Added "+`${data.name}`+" to the database.");
+                        initialPrompt();
+                    });
+                    
+                })
+            
+            
+            };
+            addDepartment();
         } else if (selection === "Add a role") {
-            //db.query('SELECT * FROM students', function (err, results) {
-                console.log(results);
-                initialPrompt();
-            //});
+            function addRole(){
+                inquirer.prompt([{
+                    type: "input",
+                    message: "What is the name of the role?",
+                    name: "title"
+                },{
+                    type: "input",
+                    message: "What is the salary of the role?",
+                    name: "salary"
+                },{
+                    type: "input",
+                    message: "What department does the role belong to?",
+                    name: "department_id"
+                }])
+            
+                .then((data) =>{
+            
+                    db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${data.title}', '${data.salary}', '${data.department_id}')`, (err, results) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        console.log("Added "+`${data.name}`+" to the database.");
+                        initialPrompt();
+                    });
+                    
+                })
+            
+            
+            };
+            addRole();
         } else if (selection === "Add an employee") {
            // db.query('SELECT * FROM students', function (err, results) {
                 console.log(results);
