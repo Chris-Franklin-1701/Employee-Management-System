@@ -2,8 +2,16 @@ const inquirer = require('inquirer');
 // Import and require mysql2
 const mysql = require('mysql2');
 const cTable = require('console.table');
+const figlet = require('figlet');
 require("dotenv").config();
 
+console.log(figlet.textSync('Employee Management System', {
+    font: 'Doom',
+    horizontalLayout: 'default',
+    verticalLayout: 'default',
+    width: 100,
+    whitespaceBreak: true
+}));
 
 // Connect to database
 const db = mysql.createConnection(
