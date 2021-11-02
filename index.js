@@ -8,9 +8,9 @@ require("dotenv").config();
 // Connect to database
 const db = mysql.createConnection(
     {
-    host: 'localhost',
+    host: process.env.DB_HOST,
     // MySQL username,
-    user: 'root',
+    user: process.env.DB_USER,
     // MySQL password
     password: process.env.DB_Pass,
     database: 'employees_db'
@@ -25,7 +25,6 @@ function init() {
 
 
 
-init();
 
 
 function initialPrompt(){
@@ -81,40 +80,128 @@ function initialPrompt(){
             addDepartment();
         } else if (selection === "Add a role") {
             function addRole(){
-                inquirer.prompt([{
-                    type: "input",
-                    message: "What is the name of the role?",
-                    name: "title"
-                },{
-                    type: "input",
-                    message: "What is the salary of the role?",
-                    name: "salary"
-                },{
-                    type: "input",
-                    message: "What department does the role belong to?",
-                    name: "department_id"
-                }])
+                const departmentCall = `SELECT name FROM departments;`;
+                db.query(departmentCall, function (err,results) {
+                    if (err) throw err;
+                    const departmentsArr = results;
             
-                .then((data) =>{
+                    inquirer.prompt([{
+                        type:"input",
+                        message: "What is the name of the role?",
+                        name: "title"
+                    },
+                    {
+                        type: "input",
+                        message: "What is the salary of the role?",
+                        name: "salary"
+                    },
+                    {
+                        type: "list",
+                        message: "What department does the role belong to?",
+                        name: "department_id",
+                        choices: departmentsArr
+                    }])
             
-                    db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${data.title}', '${data.salary}', '${data.department_id}')`, (err, results) => {
-                        if (err) {
-                            console.log(err);
-                        }
-                        console.log("Added "+`${data.name}`+" to the database.");
-                        initialPrompt();
+                    .then ((data) => {
+                        const resultsArr = [data.title, data.salary];
+                        const idCall = `SELECT id FROM departments WHERE name = ?;`;
+            
+                        db.query(idCall, data.department_id, function (err, results) {
+                            resultsArr.push(results[0].id);
+            
+                            const role = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            
+                            db.query(role, resultsArr, function (err, results) {
+                                if (err){
+                                    console.log(err);
+                                }
+                                console.log("Added "+`${data.tile}`+" role to the database.");
+                                initialPrompt();
+                            });
+                        });
                     });
-                    
-                })
-            
+                });
             
             };
             addRole();
         } else if (selection === "Add an employee") {
-           // db.query('SELECT * FROM students', function (err, results) {
-                console.log(results);
-                initialPrompt();
-            //});
+            function addEmployee(){
+                inquirer.prompt([{
+                    type:"input",
+                    message: "What is the employee's first name?",
+                    name: "first_name"
+                },
+                {
+                    type: "input",
+                    message: "What is the employee's last name?",
+                    name: "last_name"
+                }])
+        
+                .then((data) => {
+                    const dataArr = [data.first_name, data.last_name];
+                    const roleCall = `SELECT title AS name FROM roles;`;
+                    db.query(roleCall, function (err,results) {
+                    if (err) throw err;
+                    const rolesArr = results;
+                    inquirer.prompt([{
+                        type: "list",
+                        message: "What is the employee's role?",
+                        name: "role",
+                        choices: rolesArr
+                    }])
+                    .then((data) => {
+                        const roleIdCall = `SELECT id FROM roles WHERE title = ?;`;
+                        db.query(roleIdCall, data.role, (err, results) => {
+                            if (err) throw err;
+                            dataArr.push(results[0].id);
+        
+                            const managerCall = `SELECT CONCAT(first_name,' ', last_name) AS name FROM employee WHERE manager_id is NULL;`;
+                            db.query(managerCall, (err, results) => {
+                            if (err) throw err;
+                            const managerArr = results;
+                            managerArr.splice(0,0, "None");
+                            inquirer.prompt([{
+                                type: "list",
+                                message: "Who is the employee's manager?",
+                                name: "manager",
+                                choices: managerArr
+                            }])
+                            .then((data) => {
+                                if (data.manager === "None") {
+                                    dataArr.push(null);
+                                    const addEmp = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`;
+                                    db.query(addEmp, dataArr, (err, results) => {
+                                        if (err) {
+                                            console.log(err);
+                                        }
+                                        console.log(`Added ${dataArr[0]+" "+dataArr[1]} to the database.`);
+                                        initialPrompt();
+                                    });
+                                } else {
+                                    const name = data.manager.split(" ");
+                                    const managerIdCall = `SELECT id FROM employee WHERE first_name =? AND last_name = ?;`;
+                                    db.query(managerIdCall, name, (err, results) => {
+                                        if (err) throw err;
+                                        dataArr.push(results[0].id);
+                                        const addEmp = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`;
+                                        db.query(addEmp, dataArr, (err, results) => {
+                                            if (err) {
+                                                console.log(err);
+                                            }
+                                            console.log(`Added ${dataArr[0]+" "+dataArr[1]} to the database.`);
+                                            initialPrompt();
+                                        });
+                                    });
+                                };
+                            })
+                        })
+                        
+                        })
+                    })
+                })
+            });
+        };
+        addEmployee();
         } else if (selection === "Update an employee") {
             //db.query('SELECT * FROM students', function (err, results) {
                 console.log(results);
@@ -131,3 +218,5 @@ function initialPrompt(){
         };
     });
 };
+
+init();
