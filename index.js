@@ -90,7 +90,9 @@ function initialPrompt(){
             function addRole(){
                 const departmentCall = `SELECT name FROM departments;`;
                 db.query(departmentCall, function (err,results) {
-                    if (err) throw err;
+                    if (err) {
+                        console.log(err);
+                    }
                     const departmentsArr = results;
             
                     inquirer.prompt([{
@@ -123,7 +125,7 @@ function initialPrompt(){
                                 if (err){
                                     console.log(err);
                                 }
-                                console.log("Added "+`${data.tile}`+" role to the database.");
+                                console.log("Added "+`${resultsArr[0]}`+" role to the database.");
                                 initialPrompt();
                             });
                         });
@@ -149,7 +151,9 @@ function initialPrompt(){
                     const dataArr = [data.first_name, data.last_name];
                     const roleCall = `SELECT title AS name FROM roles;`;
                     db.query(roleCall, function (err,results) {
-                    if (err) throw err;
+                    if (err) {
+                        console.log(err);
+                    }
                     const rolesArr = results;
                     inquirer.prompt([{
                         type: "list",
@@ -160,12 +164,16 @@ function initialPrompt(){
                     .then((data) => {
                         const roleIdCall = `SELECT id FROM roles WHERE title = ?;`;
                         db.query(roleIdCall, data.role, (err, results) => {
-                            if (err) throw err;
+                            if (err) {
+                                console.log(err);
+                            }
                             dataArr.push(results[0].id);
         
                             const managerCall = `SELECT CONCAT(first_name,' ', last_name) AS name FROM employee WHERE manager_id is NULL;`;
                             db.query(managerCall, (err, results) => {
-                            if (err) throw err;
+                            if (err) {
+                                console.log(err);
+                            }
                             const managerArr = results;
                             managerArr.splice(0,0, "None");
                             inquirer.prompt([{
@@ -189,7 +197,9 @@ function initialPrompt(){
                                     const name = data.manager.split(" ");
                                     const managerIdCall = `SELECT id FROM employee WHERE first_name =? AND last_name = ?;`;
                                     db.query(managerIdCall, name, (err, results) => {
-                                        if (err) throw err;
+                                        if (err) {
+                                            console.log(err);
+                                        }
                                         dataArr.push(results[0].id);
                                         const addEmp = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);`;
                                         db.query(addEmp, dataArr, (err, results) => {
